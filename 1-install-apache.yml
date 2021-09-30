@@ -1,6 +1,7 @@
 ---
 - name: Install apache and check service state
   hosts: all
+  become: yes
 
   tasks:
   - name: install the latest version of Apache
