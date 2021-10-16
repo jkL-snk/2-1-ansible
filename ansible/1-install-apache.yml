@@ -1,0 +1,35 @@
+---
+- name: Install apache and check service state
+  hosts: all
+  become: yes
+
+  tasks:
+  - name: install the latest version of Apache
+    yum:
+      name: httpd
+      state: latest # optional, latest is the default
+
+  - name: Enable service httpd, and not touch the state
+    service:
+      name: httpd
+      enabled: yes
+
+  - name: Start service httpd, if not started
+    service:
+      name: httpd
+      state: started
+
+- name: Create homepage and enable port access
+  hosts: all
+  become: yes
+
+  tasks:
+  - name: Add a line to a file if the file does not exist, without passing regexp
+    lineinfile:
+      path: /var/www/html/index.html
+      line: Welcome to my web server
+      create: yes
+  - firewalld:
+      service: http
+      permanent: yes
+      state: enabled

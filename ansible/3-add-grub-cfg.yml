@@ -1,0 +1,51 @@
+---
+- name: Setup GRUB
+  hosts: all
+  become: yes
+
+  tasks:
+
+  - name: check config ifnames
+    lineinfile:
+      backup: true
+      path: /etc/default/grub
+      regexp: '^GRUB_CMDLINE_LINUX=".*net.ifnames=0'
+      state: absent
+    check_mode: true
+    register: grub_cmdline_check_ifnames
+    changed_when: false
+
+  - name: insert ifnames if missing
+    lineinfile:
+      backrefs: true
+      path: /etc/default/grub
+      regexp: "^(GRUB_CMDLINE_LINUX=\".*)\"$"
+      line: '\1 net.ifnames=0"'
+    when: grub_cmdline_check_ifnames.found == 0
+    notify: update grub
+
+  - name: check config biosdevname
+    lineinfile:
+      backup: true
+      path: /etc/default/grub
+      regexp: '^GRUB_CMDLINE_LINUX=".*biosdevname=0'
+      state: absent
+    check_mode: true
+    register: grub_cmdline_check_biosdevname
+    changed_when: false
+
+  - name: insert biosdevname=0 if missing
+    lineinfile:
+      backrefs: true
+      path: /etc/default/grub
+      regexp: "^(GRUB_CMDLINE_LINUX=\".*)\"$"
+      line: '\1 biosdevname=0"'
+    when: grub_cmdline_check_biosdevname.found == 0
+    notify: update grub
+
+  handlers:
+  - name: update grub
+    command:
+      cmd: grub2-mkconfig
+
+

@@ -1,0 +1,19 @@
+---
+- name: Uninstall service
+  hosts: all
+  become: yes
+
+  tasks:
+  - yum:
+      name: httpd
+      state: absent
+
+- name: remove port access
+  hosts: all
+  become: yes
+
+  tasks:
+  - firewalld:
+      service: http
+      permanent: yes
+      state: disabled
